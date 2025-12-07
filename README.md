@@ -2,7 +2,7 @@ MX-C25-4-Wiki
   
 ---  
   
-[![Build](访问网站)](https://mxtxx25-4-wiki.github.io/)  
+(访问网站)](https://mxtxx25-4-wiki.github.io/)  
   
 托管了我们的点点滴滴。  
   
