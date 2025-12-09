@@ -1,178 +1,85 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>图床预览站</title>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>外部图床墙</title>
   <style>
-    :root {
-      --bg: #f5f7fa;
-      --fg: #2c3e50;
-      --accent: #3498db;
-      --radius: 6px;
-    }
-    * {
-      box-sizing: border-box;
-    }
-    body {
-      margin: 0;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
-      background: var(--bg);
-      color: var(--fg);
-      display: flex;
-      height: 100vh;
-    }
-    /* 左侧导航 */
-    nav {
-      width: 180px;
-      background: #fff;
-      border-right: 1px solid #e5e5e5;
-      padding: 1.5rem 1rem;
-      position: fixed;
-      height: 100%;
-      left: 0;
-      top: 0;
-    }
-    nav a {
-      display: block;
-      margin: 0.6rem 0;
-      color: var(--fg);
-      text-decoration: none;
-      font-weight: 500;
-      transition: color 0.2s;
-    }
-    nav a:hover {
-      color: var(--accent);
-    }
-    /* 右侧内容区 */
-    main {
-      margin-left: 180px;
-      padding: 2rem;
-      width: 100%;
-      overflow-y: auto;
-    }
-    section {
-      margin-bottom: 3rem;
-    }
-    h2 {
-      margin-top: 0;
-    }
-    input[type="text"] {
-      width: 100%;
-      max-width: 400px;
-      padding: 0.5rem 0.75rem;
-      border: 1px solid #ccd1d9;
-      border-radius: var(--radius);
-      font-size: 1rem;
-    }
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-      gap: 1rem;
-      margin-top: 1rem;
-    }
-    .grid img,
-    .grid video {
-      width: 100%;
-      height: 120px;
-      object-fit: cover;
-      border-radius: var(--radius);
-      background: #e5e5e5;
-    }
-    .item {
-      background: #fff;
-      padding: 0.5rem;
-      border-radius: var(--radius);
-      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
-    }
-    .hidden {
-      display: none;
-    }
+    :root{--bg:#f5f7fa;--fg:#2c3e50;--accent:#3498db;--radius:6px}
+    *{box-sizing:border-box}
+    body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;background:var(--bg);color:var(--fg);display:flex;height:100vh}
+    nav{width:180px;background:#fff;border-right:1px solid #e5e5e5;padding:1.5rem 1rem;position:fixed;height:100%;left:0;top:0}nav a{display:block;margin:.6rem 0;color:var(--fg);text-decoration:none;font-weight:500;transition:color .2s}nav a:hover{color:var(--accent)}
+    main{margin-left:180px;padding:2rem;width:100%;overflow-y:auto}section{margin-bottom:3rem}h2{margin-top:0}input[type=text]{width:100%;max-width:400px;padding:.5rem .75rem;border:1px solid #ccd1d9;border-radius:var(--radius);font-size:1rem}.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:1rem;margin-top:1rem}.grid img,.grid video{width:100%;height:120px;object-fit:cover;border-radius:var(--radius);background:#e5e5e5}.item{background:#fff;padding:.5rem;border-radius:var(--radius);box-shadow:0 1px 3px rgba(0,0,0,.08)}.hidden{display:none}
   </style>
 </head>
 <body>
-  <!-- 左侧导航 -->
   <nav>
-    <a href="#img">📷 图床</a>
+    <a href="#img">📷 图片</a>
     <a href="#video">🎬 视频</a>
     <a href="#search">🔍 搜索</a>
   </nav>
-
-  <!-- 右侧内容 -->
   <main>
-    <!-- 图床区域 -->
-    <section id="img">
-      <h2>图床预览</h2>
-      <p>粘贴图片直链后回车（多图用逗号分隔）：</p>
-      <input type="text" id="imgInput" placeholder="https://example.com/1.jpg, https://example.com/2.png" />
-      <div id="imgGrid" class="grid"></div>
-    </section>
-
-    <!-- 视频区域 -->
-    <section id="video">
-      <h2>视频预览</h2>
-      <p>粘贴视频直链后回车（多视频用逗号分隔）：</p>
-      <input type="text" id="videoInput" placeholder="https://example.com/video1.mp4, https://example.com/video2.mp4" />
-      <div id="videoGrid" class="grid"></div>
-    </section>
-
-    <!-- 搜索区域 -->
+    <section id="img"><h2>图片预览</h2><div id="imgGrid" class="grid"></div></section>
+    <section id="video"><h2>视频预览</h2><div id="videoGrid" class="grid"></div></section>
     <section id="search">
       <h2>资源搜索</h2>
-      <input type="text" id="searchInput" placeholder="输入关键字过滤已加载的资源" />
+      <input id="searchInput" type="text" placeholder="输入关键字过滤">
     </section>
   </main>
 
   <script>
-    /* --------- 通用渲染函数 --------- */
-    function render(srcList, gridId, tagName) {
-      const grid = document.getElementById(gridId);
-      grid.innerHTML = "";
-      srcList.forEach(src => {
-        if (!src.trim()) return;
-        const item = document.createElement("div");
-        item.className = "item";
-        const media = document.createElement(tagName);
-        media.src = src.trim();
-        media.controls = tagName === "video";
-        item.appendChild(media);
-        grid.appendChild(item);
-      });
+    /* ==========  唯一配置：填图床参数  ========== */
+    const BUCKET = "mxc25-4";              // 例：myimgbed
+    const REGION = "oss-cn-shanghai";      // 例：oss-cn-shanghai
+    const PREFIX = "";               // 目录前缀（空 = 整桶）
+    const LIST_API = `https://object-storage.mxc25-4.3d.tc/?list-type=2&prefix=${PREFIX}&max-keys=1000`;
+    const RAW_BASE = `https://object-storage.mxc25-4.3d.tc/`;
+
+    const imgExts = ["jpg", "jpeg", "png", "gif", "webp", "svg"];
+    const videoExts = ["mp4", "webm", "ogg"];
+
+    /* ==========  递归扫描 XML  ========== */
+    async function load() {
+      const resp = await fetch(LIST_API);
+      if (!resp.ok) { alert("列举失败，检查 CORS 或路径"); return; }
+      const text = await resp.text();
+      const data = new DOMParser().parseFromString(text, "text/xml");
+      const contents = Array.from(data.querySelectorAll("Key"));
+      for (const node of contents) {
+        const key = node.textContent;
+        const ext = key.split(".").pop().toLowerCase();
+        if (imgExts.includes(ext)) addMedia(key, "img");
+        if (videoExts.includes(ext)) addMedia(key, "video");
+      }
+    }
+    function addMedia(key, type) {
+      const grid = document.getElementById(type + "Grid");
+      const item = document.createElement("div");
+      item.className = "item";
+      const media = document.createElement(type === "img" ? "img" : "video");
+      if (type === "video") media.controls = true;
+      media.src = `${RAW_BASE}/${key}`;
+      item.appendChild(media);
+      grid.appendChild(item);
     }
 
-    /* --------- 图床交互 --------- */
-    document.getElementById("imgInput").addEventListener("keydown", e => {
-      if (e.key === "Enter") {
-        const urls = e.target.value.split(",");
-        render(urls, "imgGrid", "img");
-      }
-    });
-
-    /* --------- 视频交互 --------- */
-    document.getElementById("videoInput").addEventListener("keydown", e => {
-      if (e.key === "Enter") {
-        const urls = e.target.value.split(",");
-        render(urls, "videoGrid", "video");
-      }
-    });
-
-    /* --------- 搜索过滤 --------- */
+    /* ==========  搜索过滤  ========== */
     document.getElementById("searchInput").addEventListener("input", e => {
       const kw = e.target.value.toLowerCase();
-      document.querySelectorAll(".grid .item").forEach(item => {
-        const media = item.querySelector("img, video");
-        const src = media.src.toLowerCase();
-        item.classList.toggle("hidden", kw && !src.includes(kw));
+      document.querySelectorAll(".grid .item").forEach(it => {
+        const src = it.querySelector("img,video").src.toLowerCase();
+        it.classList.toggle("hidden", kw && !src.includes(kw));
       });
     });
 
-    /* --------- 锚点平滑滚动 --------- */
-    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-      anchor.addEventListener("click", function(e) {
-        e.preventDefault();
-        document.querySelector(this.getAttribute("href")).scrollIntoView({ behavior: "smooth" });
-      });
-    });
+    /* ==========  平滑滚动  ========== */
+    document.querySelectorAll('a[href^="#"]').forEach(a => a.addEventListener("click", e => {
+      e.preventDefault();
+      document.querySelector(a.getAttribute("href")).scrollIntoView({ behavior: "smooth" });
+    }));
+
+    /* ==========  入口  ========== */
+    load();
   </script>
 </body>
 </html>
