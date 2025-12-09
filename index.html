@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
-  <title>外部图床墙</title>
+  <title>外部图床预览</title>
   <style>
     :root{--bg:#f5f7fa;--fg:#2c3e50;--accent:#3498db;--radius:6px}
     *{box-sizing:border-box}
@@ -28,59 +28,51 @@
   </main>
 
   <script>
-    /* ==========  唯一配置：填图床参数  ========== */
-/* ==========  唯一配置：填图床参数  ========== */
-    const BUCKET   = "mxc25-4";                    // 空间名称（只用来拼路径，可省略）
-    const DOMAIN   = "object-storage.mxc25-4.3d.tc"; // 你的「空间域名」或 CNAME 绑定域名
-    const PREFIX   = "";                           // 目录前缀（空 = 根目录）
-    const LIST_API = `https://${DOMAIN}/?list-type=2&prefix=${PREFIX}&max-keys=1000`;
-    const RAW_BASE = `https://${DOMAIN}/`;         // 直链前缀（末尾留 /）
+    /* ==========  配置区：改这里即可 ========== */
+    const CONFIG = {
+      img: [
+        "https://object-storage.mxc25-4.3d.tc/10月学习之星.jpg",
+        "https://object-storage.mxc25-4.3d.tc/10月进步之星.jpg",
+        "https://object-storage.mxc25-4.3d.tc/what？i don‘t know.jpg",
+        "https://object-storage.mxc25-4.3d.tc/一千米长跑女子.jpg"
+      ],
+      video: [
+        "https://object-storage.mxc25-4.3d.tc/2025秋季运动会毛毛虫.mp4",
+        "https://object-storage.mxc25-4.3d.tc/世界赠与我的.mp4"
+      ]
+    };
 
-    const imgExts = ["jpg", "jpeg", "png", "gif", "webp", "svg"];
-    const videoExts = ["mp4", "webm", "ogg"];
-
-    /* ==========  递归扫描 XML  ========== */
-    async function load() {
-      const resp = await fetch(LIST_API);
-      if (!resp.ok) { alert("列举失败，检查 CORS 或路径"); return; }
-      const text = await resp.text();
-      const data = new DOMParser().parseFromString(text, "text/xml");
-      const contents = Array.from(data.querySelectorAll("Key"));
-      for (const node of contents) {
-        const key = node.textContent;
-        const ext = key.split(".").pop().toLowerCase();
-        if (imgExts.includes(ext)) addMedia(key, "img");
-        if (videoExts.includes(ext)) addMedia(key, "video");
-      }
-    }
-    function addMedia(key, type) {
-      const grid = document.getElementById(type + "Grid");
-      const item = document.createElement("div");
-      item.className = "item";
-      const media = document.createElement(type === "img" ? "img" : "video");
-      if (type === "video") media.controls = true;
-      media.src = `${RAW_BASE}/${key}`;
-      item.appendChild(media);
-      grid.appendChild(item);
+    /* ==========  渲染函数  ========== */
+    function render(type) {
+      const grid = document.getElementById(type + 'Grid');
+      grid.innerHTML = '';
+      CONFIG[type].forEach(url => {
+        const item = document.createElement('div'); item.className = 'item';
+        const media = document.createElement(type === 'img' ? 'img' : 'video');
+        if (type === 'video') media.controls = true;
+        media.src = url;
+        item.appendChild(media);
+        grid.appendChild(item);
+      });
     }
 
     /* ==========  搜索过滤  ========== */
-    document.getElementById("searchInput").addEventListener("input", e => {
+    document.getElementById('searchInput').addEventListener('input', e => {
       const kw = e.target.value.toLowerCase();
-      document.querySelectorAll(".grid .item").forEach(it => {
-        const src = it.querySelector("img,video").src.toLowerCase();
-        it.classList.toggle("hidden", kw && !src.includes(kw));
+      document.querySelectorAll('.grid .item').forEach(it => {
+        const src = it.querySelector('img,video').src.toLowerCase();
+        it.classList.toggle('hidden', kw && !src.includes(kw));
       });
     });
 
     /* ==========  平滑滚动  ========== */
-    document.querySelectorAll('a[href^="#"]').forEach(a => a.addEventListener("click", e => {
+    document.querySelectorAll('a[href^="#"]').forEach(a => a.addEventListener('click', e => {
       e.preventDefault();
-      document.querySelector(a.getAttribute("href")).scrollIntoView({ behavior: "smooth" });
+      document.querySelector(a.getAttribute('href')).scrollIntoView({ behavior: 'smooth' });
     }));
 
     /* ==========  入口  ========== */
-    load();
+    render('img'); render('video');
   </script>
 </body>
 </html>
