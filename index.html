@@ -29,11 +29,12 @@
 
   <script>
     /* ==========  唯一配置：填图床参数  ========== */
-    const BUCKET = "mxc25-4";              // 例：myimgbed
-    const REGION = "oss-cn-shanghai";      // 例：oss-cn-shanghai
-    const PREFIX = "";               // 目录前缀（空 = 整桶）
-    const LIST_API = `https://object-storage.mxc25-4.3d.tc/?list-type=2&prefix=${PREFIX}&max-keys=1000`;
-    const RAW_BASE = `https://object-storage.mxc25-4.3d.tc/`;
+/* ==========  唯一配置：填图床参数  ========== */
+    const BUCKET   = "mxc25-4";                    // 空间名称（只用来拼路径，可省略）
+    const DOMAIN   = "object-storage.mxc25-4.3d.tc"; // 你的「空间域名」或 CNAME 绑定域名
+    const PREFIX   = "";                           // 目录前缀（空 = 根目录）
+    const LIST_API = `https://${DOMAIN}/?list-type=2&prefix=${PREFIX}&max-keys=1000`;
+    const RAW_BASE = `https://${DOMAIN}/`;         // 直链前缀（末尾留 /）
 
     const imgExts = ["jpg", "jpeg", "png", "gif", "webp", "svg"];
     const videoExts = ["mp4", "webm", "ogg"];
