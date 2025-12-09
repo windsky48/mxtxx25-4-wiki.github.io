@@ -1,78 +1,51 @@
-<!DOCTYPE html>
-<html lang="zh-CN">
-<head>
-  <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1"/>
-  <title>外部图床预览</title>
-  <style>
-    :root{--bg:#f5f7fa;--fg:#2c3e50;--accent:#3498db;--radius:6px}
-    *{box-sizing:border-box}
-    body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;background:var(--bg);color:var(--fg);display:flex;height:100vh}
-    nav{width:180px;background:#fff;border-right:1px solid #e5e5e5;padding:1.5rem 1rem;position:fixed;height:100%;left:0;top:0}nav a{display:block;margin:.6rem 0;color:var(--fg);text-decoration:none;font-weight:500;transition:color .2s}nav a:hover{color:var(--accent)}
-    main{margin-left:180px;padding:2rem;width:100%;overflow-y:auto}section{margin-bottom:3rem}h2{margin-top:0}input[type=text]{width:100%;max-width:400px;padding:.5rem .75rem;border:1px solid #ccd1d9;border-radius:var(--radius);font-size:1rem}.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:1rem;margin-top:1rem}.grid img,.grid video{width:100%;height:120px;object-fit:cover;border-radius:var(--radius);background:#e5e5e5}.item{background:#fff;padding:.5rem;border-radius:var(--radius);box-shadow:0 1px 3px rgba(0,0,0,.08)}.hidden{display:none}
-  </style>
-</head>
-<body>
-  <nav>
-    <a href="#img">📷 图片</a>
-    <a href="#video">🎬 视频</a>
-    <a href="#search">🔍 搜索</a>
-  </nav>
-  <main>
-    <section id="img"><h2>图片预览</h2><div id="imgGrid" class="grid"></div></section>
-    <section id="video"><h2>视频预览</h2><div id="videoGrid" class="grid"></div></section>
-    <section id="search">
-      <h2>资源搜索</h2>
-      <input id="searchInput" type="text" placeholder="输入关键字过滤">
-    </section>
-  </main>
+<!-- 1. 增量样式（放大遮罩） -->
+<style>
+/* 新增：全屏遮罩 */
+.modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  cursor: zoom-out;
+  opacity: 0;
+  transition: opacity .3s;
+}
+.modal.show {
+  opacity: 1;
+}
+.modal img {
+  max-width: 90%;
+  max-height: 90%;
+  border-radius: var(--radius);
+  object-fit: contain;
+}
+</style>
 
-  <script>
-    /* ==========  配置区：改这里即可 ========== */
-    const CONFIG = {
-      img: [
-        "https://object-storage.mxc25-4.3d.tc/10月学习之星.jpg",
-        "https://object-storage.mxc25-4.3d.tc/10月进步之星.jpg",
-        "https://object-storage.mxc25-4.3d.tc/what？i don‘t know.jpg",
-        "https://object-storage.mxc25-4.3d.tc/一千米长跑女子.jpg"
-      ],
-      video: [
-        "https://object-storage.mxc25-4.3d.tc/2025秋季运动会毛毛虫.mp4",
-        "https://object-storage.mxc25-4.3d.tc/世界赠与我的.mp4"
-      ]
-    };
+<!-- 2. 增量 DOM（遮罩，动态插入） -->
+<script>
+// 创建遮罩一次即可
+const modal = document.createElement('div');
+modal.className = 'modal';
+const modalImg = document.createElement('img');
+modal.appendChild(modalImg);
+document.body.appendChild(modal);
 
-    /* ==========  渲染函数  ========== */
-    function render(type) {
-      const grid = document.getElementById(type + 'Grid');
-      grid.innerHTML = '';
-      CONFIG[type].forEach(url => {
-        const item = document.createElement('div'); item.className = 'item';
-        const media = document.createElement(type === 'img' ? 'img' : 'video');
-        if (type === 'video') media.controls = true;
-        media.src = url;
-        item.appendChild(media);
-        grid.appendChild(item);
-      });
-    }
-
-    /* ==========  搜索过滤  ========== */
-    document.getElementById('searchInput').addEventListener('input', e => {
-      const kw = e.target.value.toLowerCase();
-      document.querySelectorAll('.grid .item').forEach(it => {
-        const src = it.querySelector('img,video').src.toLowerCase();
-        it.classList.toggle('hidden', kw && !src.includes(kw));
-      });
+// 点击放大
+function bindZoom() {
+  document.querySelectorAll('#imgGrid img').forEach(img => {
+    img.style.cursor = 'zoom-in';
+    img.addEventListener('click', () => {
+      modalImg.src = img.src;          // 复用原图直链
+      modal.classList.add('show');
     });
+  });
+  modal.addEventListener('click', () => modal.classList.remove('show'));
+}
 
-    /* ==========  平滑滚动  ========== */
-    document.querySelectorAll('a[href^="#"]').forEach(a => a.addEventListener('click', e => {
-      e.preventDefault();
-      document.querySelector(a.getAttribute('href')).scrollIntoView({ behavior: 'smooth' });
-    }));
-
-    /* ==========  入口  ========== */
-    render('img'); render('video');
-  </script>
-</body>
-</html>
+// 渲染后绑定
+render('img');
+bindZoom();   // ← 只加这一行
+</script>
